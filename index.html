@@ -17,6 +17,8 @@
       --sun: #FFD23F;
       --berry: #E8457A;
       --leaf: #2E9E5B;
+      --go: #22A45D;
+      --muted: #C9CCD9;
       --shadow: #1F2A5A;
       color-scheme: light;
     }
@@ -29,6 +31,8 @@
         --sun: #F5C52E;
         --berry: #F06292;
         --leaf: #43B66F;
+        --go: #34C474;
+        --muted: #4A5385;
         --shadow: #0A0F2A;
         color-scheme: dark;
       }
@@ -71,29 +75,102 @@
       margin: 0 0 20px;
     }
 
-    /* Story picker */
-    #shelf {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 16px;
-    }
-    .book {
+    /* ---------- Things you can pick (stories and choices) ---------- */
+    .pick {
+      position: relative;
       font: inherit;
       color: #1F2A5A;
       border: 4px solid var(--ink);
       border-radius: 20px;
       box-shadow: 0 6px 0 var(--shadow);
-      padding: 14px 10px 12px;
       cursor: pointer;
+      transition: transform 0.1s, box-shadow 0.1s, opacity 0.15s;
+    }
+    .pick:active { transform: translateY(4px); box-shadow: 0 2px 0 var(--shadow); }
+
+    /* When one thing is picked, the others fade a little */
+    .has-pick .pick:not(.picked) { opacity: 0.55; }
+
+    .pick.picked {
+      transform: scale(1.03);
+      outline: 6px solid var(--go);
+      outline-offset: 3px;
+    }
+    .pick.picked::after {
+      content: "✔";
+      position: absolute;
+      top: -16px;
+      right: -14px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--go);
+      color: #fff;
+      border: 3px solid var(--ink);
+      font-size: 24px;
+      line-height: 34px;
+      font-weight: 800;
+    }
+
+    /* Story picker */
+    #shelf {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 18px;
+    }
+    .book {
+      padding: 14px 10px 12px;
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 4px;
-      transition: transform 0.08s, box-shadow 0.08s;
     }
     .book .icon { font-size: 56px; line-height: 1.1; }
     .book .name { font-size: 22px; font-weight: 800; line-height: 1.15; }
-    .book:active { transform: translateY(6px); box-shadow: 0 0 0 var(--shadow); }
+
+    /* Choices inside a story */
+    #choices { display: grid; gap: 16px; }
+    .choice {
+      font-size: clamp(20px, 5vw, 24px);
+      font-weight: 800;
+      background: var(--sun);
+      padding: 14px 18px;
+      min-height: 72px;
+    }
+    .choice:nth-child(2) { background: #8FD3FF; }
+    .choice:nth-child(3) { background: #FFB3C9; }
+
+    /* The big checkmark button that confirms */
+    .go {
+      font: inherit;
+      width: 100%;
+      margin-top: 22px;
+      font-size: clamp(24px, 6vw, 30px);
+      font-weight: 800;
+      color: #fff;
+      background: var(--go);
+      border: 4px solid var(--ink);
+      border-radius: 999px;
+      box-shadow: 0 6px 0 var(--shadow);
+      padding: 12px 18px;
+      cursor: pointer;
+      transition: transform 0.1s, box-shadow 0.1s;
+    }
+    .go:active { transform: translateY(4px); box-shadow: 0 2px 0 var(--shadow); }
+    .go:disabled {
+      background: var(--muted);
+      color: var(--ink);
+      opacity: 0.7;
+      cursor: default;
+      box-shadow: none;
+      transform: none;
+    }
+    .go.ready { animation: wiggle 0.5s ease-in-out; }
+    @keyframes wiggle {
+      0%, 100% { transform: rotate(0); }
+      25% { transform: rotate(-2deg) scale(1.03); }
+      75% { transform: rotate(2deg) scale(1.03); }
+    }
 
     /* Story screen */
     .topbar {
@@ -135,31 +212,36 @@
       margin: 0 0 22px;
     }
 
-    #choices { display: grid; gap: 14px; }
-    .choice {
-      font: inherit;
-      font-size: clamp(20px, 5vw, 24px);
-      font-weight: 800;
-      color: #1F2A5A;
-      background: var(--sun);
-      border: 4px solid var(--ink);
-      border-radius: 20px;
-      box-shadow: 0 6px 0 var(--shadow);
-      padding: 14px 18px;
-      min-height: 72px;
-      cursor: pointer;
-      transition: transform 0.08s, box-shadow 0.08s;
+    /* Grown-up voice picker */
+    .voice-row {
+      margin-top: 22px;
+      padding-top: 16px;
+      border-top: 3px dashed var(--muted);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: 700;
     }
-    .choice:nth-child(2) { background: #8FD3FF; }
-    .choice:nth-child(3) { background: #FFB3C9; }
-    .choice:active { transform: translateY(6px); box-shadow: 0 0 0 var(--shadow); }
+    .voice-row select {
+      font: inherit;
+      font-size: 16px;
+      max-width: 100%;
+      color: var(--ink);
+      background: var(--paper);
+      border: 3px solid var(--ink);
+      border-radius: 12px;
+      padding: 4px 8px;
+    }
 
     button:focus-visible { outline: 5px dashed var(--berry); outline-offset: 4px; }
     [hidden] { display: none !important; }
 
     @media (prefers-reduced-motion: reduce) {
-      #picture.pop { animation: none; }
-      .choice, .book { transition: none; }
+      #picture.pop, .go.ready { animation: none; }
+      .pick, .go { transition: none; }
     }
   </style>
 </head>
@@ -168,8 +250,15 @@
     <!-- Story picker screen -->
     <section id="home">
       <h1>📚 Pick Your Story</h1>
-      <p class="hint">Tap a story to start!</p>
+      <p class="hint">Tap a story, then tap the ✔ to start!</p>
       <div id="shelf"></div>
+      <button class="go" id="homeGo" type="button" disabled>Pick a story first</button>
+
+      <div class="voice-row" id="voiceRow" hidden>
+        <label for="voiceSelect">🗣️ Reader voice:</label>
+        <select id="voiceSelect"></select>
+        <button class="small-btn read" id="voiceTest" type="button">▶ Try it</button>
+      </div>
     </section>
 
     <!-- Story screen -->
@@ -181,6 +270,7 @@
       <div id="picture" aria-hidden="true"></div>
       <p id="text" aria-live="polite"></p>
       <div id="choices"></div>
+      <button class="go" id="storyGo" type="button" disabled>Pick one first</button>
     </section>
   </main>
 
@@ -195,203 +285,319 @@
   and "Pick another story" buttons automatically.
 */
 const stories = {
-  cat: {
-    title: "Where’s Milo?",
-    icon: "🐱",
+
+  /* ===================== MOO FARM ===================== */
+  moo: {
+    title: "Moo Farm",
+    icon: "🐄",
+    color: "#A8E6A1",
+    scenes: {
+      start: {
+        pic: "🚜👩‍🌾",
+        text: "You visit Farmer Fran’s farm. She looks worried. “Something is wrong with my animals,” she says.",
+        choices: [["Go see the birds", "bird"], ["Go see the dog", "dog"]]
+      },
+      bird: {
+        pic: "🐦",
+        text: "A little bird lands on the fence. It opens its beak and says… “MOOOO!”",
+        choices: [["Say “Birds don’t moo!”", "birdtalk"], ["Moo back at the bird", "mooback"]]
+      },
+      birdtalk: {
+        pic: "🐦❓",
+        text: "The bird tilts its head. “Moo?” it says, very quietly. Then it flies to the barn.",
+        choices: [["Follow the moo bird", "barn"]]
+      },
+      mooback: {
+        pic: "🐦😄",
+        text: "You say “MOOOO!” The bird says “MOOOO!” You have a mooing contest. The bird wins.",
+        choices: [["Follow the moo bird", "barn"]]
+      },
+      dog: {
+        pic: "🐶",
+        text: "Farmer Fran’s dog, Pickles, runs up. He wags his tail and says… “MOO!”",
+        choices: [["Throw him a stick", "stick"], ["Give him a belly rub", "belly"]]
+      },
+      stick: {
+        pic: "🐶🪵",
+        text: "You throw a stick. Pickles runs after it yelling “MOO! MOO! MOO!” He drops it by the barn.",
+        choices: [["Go to the barn", "barn"]]
+      },
+      belly: {
+        pic: "🐶😆",
+        text: "You rub his belly. His leg kicks and he goes “Moo-hoo-hoo!” That’s how a moo dog giggles.",
+        choices: [["Go to the barn", "barn"]]
+      },
+      barn: {
+        pic: "🐖🐑🐔",
+        text: "In the barn, the pig says “MOO.” The sheep says “MOO.” Even the chicken says “MOO!”",
+        choices: [["Look for the cow", "cow"], ["Ask the chicken why", "chicken"]]
+      },
+      chicken: {
+        pic: "🐔👉",
+        text: "You ask the chicken, “Why do you moo?” The chicken flaps one wing at a big brown cow.",
+        choices: [["Go find the cow", "cow"]]
+      },
+      cow: {
+        pic: "🐄🎶",
+        text: "The cow stands on a hay bale. She goes “MOO!” and all the animals copy her. “MOO!” She’s the boss of the band!",
+        choices: [["Teach them the right sounds", "teach"], ["Join the moo band", "band"]]
+      },
+      teach: {
+        pic: "🧒🐶",
+        text: "You point at Pickles and say “Woof!” Pickles thinks very hard. Then he says… “Woof-moo!”",
+        choices: [["Keep trying", "teach2"], ["Give up and laugh", "laugh"]]
+      },
+      teach2: {
+        pic: "🐔🐖🐦",
+        text: "The chicken says “Cluck!” The pig says “Oink!” The bird says “Tweet!” Farmer Fran cheers! Then the cow goes “MOO!”… and they ALL say “MOO!” again.",
+        end: true
+      },
+      laugh: {
+        pic: "😂🌾",
+        text: "You laugh so hard you fall in the hay. Now YOU say “moo” when you laugh. Moo-ha-ha-ha!",
+        end: true
+      },
+      band: {
+        pic: "🥁🐄",
+        text: "You grab a bucket for a drum. BANG! “MOO!” BANG! “MOO!” It’s the loudest song on the whole farm.",
+        choices: [["Take a big bow", "bow"]]
+      },
+      bow: {
+        pic: "👏🐄",
+        text: "Farmer Fran claps. “That’s not what I wanted, but it’s GREAT!” You bow. The cow bows. The moo bird falls off the fence.",
+        end: true
+      }
+    }
+  },
+
+  /* ===================== BISCUIT ===================== */
+  biscuit: {
+    title: "Biscuit the Cat-Dog",
+    icon: "🐶",
     color: "#FFD23F",
     scenes: {
       start: {
-        pic: "🏡🐱",
-        text: "Oh no! Your cat Milo ran out the back door! Where do you look first?",
-        choices: [["Look in the garden", "garden"], ["Ask your neighbor", "neighbor"]]
+        pic: "🏡🐶",
+        text: "Your new puppy, Biscuit, is very silly. He thinks he’s a cat!",
+        choices: [["Watch what he does", "box"]]
       },
-      garden: {
-        pic: "🌻🦋",
-        text: "You look in the garden. You see flowers and a butterfly, but no Milo.",
-        choices: [["Look in the shed", "shed"], ["Shake the treat bag", "treats"]]
+      box: {
+        pic: "🐶📦",
+        text: "Biscuit squeezes into a tiny box. Only his bottom fits. He looks at you and says, “Meow.”",
+        choices: [["Help him out", "help"], ["Get him a bigger box", "bigbox"]]
       },
-      shed: {
-        pic: "🔦📦",
-        text: "You peek in the shed with a flashlight. Just boxes and an old bike.",
-        choices: [["Shake the treat bag", "treats"]]
+      help: {
+        pic: "🐶💨",
+        text: "You pull and pull. POP! Biscuit flies out and lands in the laundry basket.",
+        choices: [["Look in the basket", "socks"]]
       },
-      treats: {
-        pic: "🛍️👂",
-        text: "Rattle, rattle! You hear a tiny meow… from up in the tree!",
-        choices: [["Get a grown-up", "ladder"], ["Call his name softly", "callname"]]
+      bigbox: {
+        pic: "📦📦",
+        text: "You get a giant box. Biscuit jumps in. Then he jumps out and squeezes back into the tiny box. Silly pup!",
+        choices: [["Give up on boxes", "socks"]]
       },
-      ladder: {
-        pic: "🪜🐱",
-        text: "Milo is stuck in the tree! Mom gets a ladder and carries him down. Phew!",
+      socks: {
+        pic: "🧦🐶",
+        text: "Biscuit has a sock on his head. He thinks it’s a fancy hat. He walks proudly into the kitchen.",
+        choices: [["Follow him", "kitchen"]]
+      },
+      kitchen: {
+        pic: "🐟🐶",
+        text: "Biscuit smells Dad’s fish sticks. He tries to jump on the counter like a cat. He slides right down. Wheee… thump!",
+        choices: [["Give him a dog treat", "treat"], ["Give him a fish stick", "fish"]]
+      },
+      treat: {
+        pic: "🦴🐶",
+        text: "You hold up a dog treat. Biscuit sniffs it. He says “Meow.” Then he eats it anyway. Crunch!",
+        choices: [["Time for a nap", "nap"]]
+      },
+      fish: {
+        pic: "🐟😋",
+        text: "Biscuit gobbles the fish stick and does a happy wiggle. Dad says, “Hey! That was MY lunch!”",
+        choices: [["Run away giggling", "nap"]]
+      },
+      nap: {
+        pic: "🪟🐶",
+        text: "Biscuit finds a sunny spot on the windowsill. He is WAY too big for it. Half of him hangs off.",
+        choices: [["Let him sleep", "sleep"], ["Ring the doorbell", "doorbell"]]
+      },
+      sleep: {
+        pic: "💤🐶",
+        text: "Biscuit falls asleep and starts to dream. His paws wiggle. He mumbles, “Meow… woof… meow… woof.” Then he snores like a tuba.",
         end: true
       },
-      callname: {
-        pic: "🌳🐱",
-        text: "You say, “Milo, come down!” He slowly climbs down all by himself. Good kitty!",
-        end: true
+      doorbell: {
+        pic: "🔔🐶",
+        text: "DING DONG! Biscuit jumps up and barks “WOOF! WOOF! WOOF!” He remembers he’s a dog! For about one minute.",
+        choices: [["Open the door", "mail"]]
       },
-      neighbor: {
-        pic: "👵🏡",
-        text: "Mrs. Park next door says, “I saw a cat by my porch!”",
-        choices: [["Look under the porch", "porch"], ["Look in her flower pots", "pots"]]
-      },
-      porch: {
-        pic: "🐱💤",
-        text: "There’s Milo, fast asleep under the porch! You carry him home.",
-        end: true
-      },
-      pots: {
-        pic: "🪴🐱",
-        text: "Milo is curled up in a big flower pot! Silly cat!",
-        end: true
-      }
-    }
-  },
-
-  beach: {
-    title: "Beach Day",
-    icon: "🏖️",
-    color: "#8FD3FF",
-    scenes: {
-      start: {
-        pic: "🏖️☀️",
-        text: "It’s a sunny day at the beach! What do you want to do first?",
-        choices: [["Build a sandcastle", "sand"], ["Look for seashells", "shells"], ["Splash in the waves", "swim"]]
-      },
-      sand: {
-        pic: "🪣🏰",
-        text: "You fill your bucket with wet sand and build a tall sandcastle.",
-        choices: [["Dig a moat around it", "moat"], ["Put shells on top", "decorate"]]
-      },
-      moat: {
-        pic: "🌊🪣",
-        text: "You dig a moat. A wave comes and fills it with water! Splash!",
-        end: true
-      },
-      decorate: {
-        pic: "🏰🐚",
-        text: "You put shells all over the top. Your sandcastle looks amazing!",
-        end: true
-      },
-      shells: {
-        pic: "🐚👀",
-        text: "You walk by the water looking for shells. Hey, one of them is moving!",
-        choices: [["Look closer", "crab"], ["Run and get Dad", "dad"]]
-      },
-      crab: {
-        pic: "🦀",
-        text: "It’s a little crab! It walks sideways back into the water. Bye, crab!",
-        end: true
-      },
-      dad: {
-        pic: "👨🦀",
-        text: "Dad says, “That’s a hermit crab. It lives inside a shell!” So cool!",
-        end: true
-      },
-      swim: {
-        pic: "🌊😄",
-        text: "You jump over the little waves. Splash! The water is cold!",
-        choices: [["Float on your back", "float"], ["Get an ice cream", "icecream"]]
-      },
-      float: {
-        pic: "🌊☁️",
-        text: "You float and look at the clouds. One looks like a dog!",
-        end: true
-      },
-      icecream: {
-        pic: "🍦😋",
-        text: "You get a big ice cream cone. It drips down your hand. Yum!",
+      mail: {
+        pic: "📬🐱",
+        text: "It’s the mail carrier, and her cat came along! The cat looks at Biscuit. Biscuit says, “Meow.” The cat says… “Woof?”",
         end: true
       }
     }
   },
 
-  baking: {
-    title: "Baking with Grandma",
+  /* ===================== PANCAKES ===================== */
+  pancakes: {
+    title: "Grandma’s Wild Pancakes",
     icon: "🥞",
     color: "#FFB3C9",
     scenes: {
       start: {
         pic: "👵🍳",
-        text: "Grandma says, “Let’s bake something today!” What should you make?",
-        choices: [["Cookies", "cookies"], ["Pancakes", "pancakes"]]
+        text: "Grandma says, “Let’s make pancakes!” She hands you a big spoon and a bowl of batter.",
+        choices: [["Stir nice and slow", "slow"], ["Stir SUPER fast", "fast"]]
       },
-      cookies: {
-        pic: "🥣🥄",
-        text: "You mix butter, sugar, and flour. What goes in the cookies?",
-        choices: [["Chocolate chips", "chips"], ["Lots of sprinkles", "sprinkles"]]
+      slow: {
+        pic: "🥣🙂",
+        text: "You stir nice and slow. The batter is smooth. Grandma says, “Perfect!” What goes in?",
+        choices: [["Blueberries", "blue"], ["Chocolate chips", "choc"]]
       },
-      chips: {
-        pic: "🍪🥛",
-        text: "The cookies come out of the oven warm and gooey. Time for milk and cookies!",
-        end: true
+      fast: {
+        pic: "🥣💥",
+        text: "You stir SO fast that batter flies everywhere! It’s on the cat, on the window, and on Grandpa’s glasses.",
+        choices: [["Say sorry", "sorry"], ["Pretend it didn’t happen", "pretend"]]
       },
-      sprinkles: {
-        pic: "🍪🎉",
-        text: "You shake on SO many sprinkles. Some land on the floor! Your cookies are super colorful.",
-        end: true
+      sorry: {
+        pic: "👴😋",
+        text: "Grandpa licks his glasses. “Mmm! Tastes good!” he says. Everyone laughs.",
+        choices: [["Start cooking", "pan"]]
       },
-      pancakes: {
-        pic: "🥞🍳",
-        text: "You stir the batter. Grandma pours it in the pan. Time to flip it!",
-        choices: [["Flip it up high", "high"], ["Flip it gently", "gentle"]]
+      pretend: {
+        pic: "😇🎵",
+        text: "You whistle and look at the ceiling. Grandpa walks in with batter on his glasses. “Is it raining in here?”",
+        choices: [["Start cooking", "pan"]]
       },
-      high: {
-        pic: "🥞🐶",
-        text: "Whoops! The pancake lands on the floor. The dog gobbles it up!",
-        choices: [["Try again, gently", "gentle"]]
+      blue: {
+        pic: "🫐",
+        text: "You drop in blueberries. Plop, plop, plop! One rolls under the fridge forever. Bye, blueberry!",
+        choices: [["Start cooking", "pan"]]
+      },
+      choc: {
+        pic: "🍫🤫",
+        text: "You add chocolate chips. You also eat a big handful. Shhh. Don’t tell Grandma.",
+        choices: [["Start cooking", "pan"]]
+      },
+      pan: {
+        pic: "🍳🥞",
+        text: "Grandma pours the batter in the pan. Sizzle, sizzle! Now it’s time to flip it.",
+        choices: [["Flip it gently", "gentle"], ["Flip it SUPER high", "high"]]
       },
       gentle: {
-        pic: "🥞🍓",
-        text: "Perfect flip! You put strawberries on top and eat it all up.",
+        pic: "🥞🙌",
+        text: "Flip! It lands perfectly. Grandma gives you a high five.",
+        choices: [["Make a tall stack", "stack"]]
+      },
+      high: {
+        pic: "🥞⬆️",
+        text: "You flip it so high that it sticks to the ceiling! Everyone looks up. Nobody moves.",
+        choices: [["Wait for it…", "drop"]]
+      },
+      drop: {
+        pic: "🥞🐶",
+        text: "SPLAT! The pancake falls right on the dog’s head. He wears it like a hat. Then he eats his hat.",
+        choices: [["Try again", "stack"]]
+      },
+      stack: {
+        pic: "🥞🥞🥞",
+        text: "You make pancake after pancake. The stack gets taller than you! It wobbles…",
+        choices: [["Hold it steady", "steady"], ["Add ONE more", "onemore"]]
+      },
+      steady: {
+        pic: "🥞🍯",
+        text: "You hold the stack while Grandma pours on syrup. It’s the best, stickiest breakfast ever.",
+        end: true
+      },
+      onemore: {
+        pic: "🥞👴",
+        text: "You add one more pancake. The stack tips over… right onto Grandpa’s plate! “Why, thank you!” says Grandpa.",
         end: true
       }
     }
   },
 
-  farm: {
-    title: "Farm Visit",
-    icon: "🚜",
-    color: "#A8E6A1",
+  /* ===================== BEACH ===================== */
+  beach: {
+    title: "The Sandwich Seagull",
+    icon: "🏖️",
+    color: "#8FD3FF",
     scenes: {
       start: {
-        pic: "🚜🌾",
-        text: "You’re visiting a farm! Where do you go first?",
-        choices: [["The barn", "barn"], ["The pond", "pond"]]
+        pic: "🏖️☀️",
+        text: "You and Dad go to the beach. Dad sets down a big picnic basket. What do you do first?",
+        choices: [["Build a sandcastle", "castle"], ["Splash in the waves", "waves"]]
       },
-      barn: {
-        pic: "🐄🐐",
-        text: "In the barn there’s a cow and a goat. Moo! Baa! What do you do?",
-        choices: [["Feed the goat", "goat"], ["Find the chickens", "eggs"]]
+      castle: {
+        pic: "🪣🏰",
+        text: "You build a tall sandcastle. A crab walks up and sits on top like it owns the place.",
+        choices: [["Wave at the crab", "crab"], ["Make it even bigger", "bigger"]]
       },
-      goat: {
-        pic: "🐐🥕",
-        text: "The goat eats the carrot right out of your hand. It tickles!",
-        end: true
+      crab: {
+        pic: "🦀👋",
+        text: "You wave. The crab waves one claw back. Then it walks sideways… right toward Dad’s toe!",
+        choices: [["Warn Dad!", "warn"]]
       },
-      eggs: {
-        pic: "🐔🥚",
-        text: "You find four eggs in the hen house. One is still warm!",
-        end: true
+      warn: {
+        pic: "👨🦀",
+        text: "Too late! The crab gives Dad’s toe a tiny pinch. Dad jumps and yells “YOWZERS!” and sits in a puddle.",
+        choices: [["Time for lunch", "picnic"]]
       },
-      pond: {
-        pic: "🦆💧",
-        text: "Ducks are swimming in the pond. Quack, quack!",
-        choices: [["Toss some duck food", "food"], ["Count the baby ducks", "count"]]
+      bigger: {
+        pic: "🏰🏰",
+        text: "You make it bigger and bigger. Dad helps. It’s so big that a family asks if they can move in.",
+        choices: [["Time for lunch", "picnic"]]
       },
-      food: {
-        pic: "🦆🦆🦆",
-        text: "The ducks swim over fast! They eat up every last bit.",
-        end: true
+      waves: {
+        pic: "🌊😄",
+        text: "You jump over the waves. A big one knocks your hat off! It floats away.",
+        choices: [["Chase the hat", "hat"]]
       },
-      count: {
-        pic: "🦆🐥🐥🐥",
-        text: "One, two, three, four, five baby ducks! They follow their mom in a line.",
+      hat: {
+        pic: "👒💦",
+        text: "You chase your hat. A wave picks it up and plops it right on Dad’s head. It’s full of water. SPLOOSH!",
+        choices: [["Time for lunch", "picnic"]]
+      },
+      picnic: {
+        pic: "🥪🧺",
+        text: "Dad unwraps a GIANT sandwich. But someone is watching…",
+        choices: [["Look up", "gull"]]
+      },
+      gull: {
+        pic: "🐦👀",
+        text: "It’s a seagull! It stares at the sandwich. It takes one step closer. Then another. Then another.",
+        choices: [["Hide the sandwich", "hide"], ["Toss it a crust", "share"]]
+      },
+      hide: {
+        pic: "🥪🙈",
+        text: "Dad hides the sandwich behind his back. The seagull walks behind Dad. Dad spins around. The seagull spins too. They spin and spin!",
+        choices: [["Keep watching", "steal"]]
+      },
+      steal: {
+        pic: "🐦🥪",
+        text: "Dad gets dizzy and flops in the sand. The seagull grabs the sandwich and flies off! “That was MY sandwich!” says Dad.",
+        choices: [["Get ice cream instead", "icecream"]]
+      },
+      share: {
+        pic: "🐦🍞",
+        text: "You toss a crust. The seagull grabs it. Then TWENTY more seagulls show up! SQUAWK! SQUAWK! SQUAWK!",
+        choices: [["Run!", "run"]]
+      },
+      run: {
+        pic: "🏃🐦🐦",
+        text: "You and Dad grab everything and run down the beach. The seagulls follow you like a silly parade.",
+        choices: [["Get ice cream instead", "icecream"]]
+      },
+      icecream: {
+        pic: "🍦😋",
+        text: "You get ice cream cones. Dad holds his way up high so no seagull can get it. A big drip lands on his nose. Ha!",
         end: true
       }
     }
   },
 
+  /* ===================== SNOW DAY ===================== */
   snow: {
     title: "Snow Day",
     icon: "⛄",
@@ -399,23 +605,43 @@ const stories = {
     scenes: {
       start: {
         pic: "❄️🏠",
-        text: "It snowed last night! No school today! What do you want to do?",
+        text: "It snowed last night! No school today! You put on boots, a coat, a hat, a scarf, and mittens. Phew! You can barely walk.",
         choices: [["Build a snowman", "snowman"], ["Go sledding", "sled"]]
       },
       snowman: {
         pic: "⛄",
-        text: "You roll three big snowballs and stack them up. What does your snowman need?",
-        choices: [["A carrot nose", "carrot"], ["A warm scarf", "scarf"]]
+        text: "You roll three big snowballs and stack them up. Your snowman needs a nose.",
+        choices: [["Use a carrot", "carrot"], ["Use a banana", "banana"]]
       },
       carrot: {
         pic: "⛄🥕",
-        text: "You stick in a carrot nose. Your snowman looks so happy!",
-        end: true
+        text: "You stick in a carrot nose. Your dog sees it. Uh oh.",
+        choices: [["Watch the dog", "dogcarrot"]]
       },
-      scarf: {
-        pic: "⛄🧣",
-        text: "You wrap your scarf around the snowman. Now he won’t be cold. Ha ha!",
-        end: true
+      dogcarrot: {
+        pic: "🐶🥕",
+        text: "The dog jumps up, grabs the carrot, and runs around the yard. Your snowman has no nose!",
+        choices: [["Chase the dog", "chase"]]
+      },
+      chase: {
+        pic: "🐶❄️",
+        text: "You chase the dog in circles until you both fall in the snow. Now YOU look like a snowman!",
+        choices: [["Go inside to warm up", "cocoa"]]
+      },
+      banana: {
+        pic: "⛄🍌",
+        text: "You give your snowman a banana nose. It looks SO silly! Mom laughs so hard she snorts.",
+        choices: [["Add more silly stuff", "silly"]]
+      },
+      silly: {
+        pic: "⛄🧦🥄",
+        text: "You add sock ears and spoon eyebrows. You name him Mr. Banana Nose.",
+        choices: [["Show the neighbors", "neighbors"]]
+      },
+      neighbors: {
+        pic: "👀⛄",
+        text: "The kid next door makes a snowman with a pickle nose. Now it’s a silly snowman contest! Mr. Banana Nose wins.",
+        choices: [["Go inside to warm up", "cocoa"]]
       },
       sled: {
         pic: "🛷⛰️",
@@ -424,61 +650,182 @@ const stories = {
       },
       fast: {
         pic: "🛷💨",
-        text: "WHOOSH! You zoom down and crash into a big soft pile of snow!",
-        choices: [["Go home for hot cocoa", "cocoa"]]
+        text: "WHOOSH! You zoom down super fast… and land head-first in a giant snowbank. Only your boots stick out!",
+        choices: [["Wiggle out", "wiggle"]]
+      },
+      wiggle: {
+        pic: "👢❄️",
+        text: "You wiggle and wiggle. POP! You come out with snow in your ears, your nose, and your pants. Brrr!",
+        choices: [["Go inside to warm up", "cocoa"]]
       },
       slow: {
-        pic: "🛷😊",
-        text: "You glide down nice and slow. You do it ten more times!",
-        choices: [["Go home for hot cocoa", "cocoa"]]
+        pic: "🛷🐢",
+        text: "You go down nice and slow. SO slow that a kid passes you. Then a dog passes you. Then Grandpa passes you… walking!",
+        choices: [["Try the fast side", "fast"]]
       },
       cocoa: {
         pic: "☕🧦",
-        text: "You put on fuzzy socks and drink hot cocoa. What a great snow day!",
+        text: "You put on fuzzy socks and drink hot cocoa. A marshmallow sticks to your nose. Now you have a snowman nose too!",
         end: true
       }
     }
   }
 };
 
+/* ---------------- Page parts ---------------- */
 const home = document.getElementById("home");
 const reader = document.getElementById("reader");
 const shelf = document.getElementById("shelf");
+const homeGo = document.getElementById("homeGo");
 const picture = document.getElementById("picture");
 const text = document.getElementById("text");
 const choices = document.getElementById("choices");
+const storyGo = document.getElementById("storyGo");
 const readBtn = document.getElementById("readBtn");
 const backBtn = document.getElementById("backBtn");
 
 let storyId = null;
 let sceneId = "start";
+let pickedAction = null;  // what happens when ✔ is tapped
+
+/* ---------------- Reading out loud ----------------
+   Browsers come with many voices. Some sound robotic, and some
+   (often labelled "Natural", "Neural", "Online", "Enhanced" or
+   "Premium") sound like a real person. We pick the most natural
+   English one we can find, and a grown-up can change it below
+   the story shelf. The choice is remembered on this device.
+*/
+const canTalk = "speechSynthesis" in window;
+const voiceRow = document.getElementById("voiceRow");
+const voiceSelect = document.getElementById("voiceSelect");
+const voiceTest = document.getElementById("voiceTest");
+let voices = [];
+let chosenVoice = null;
+
+function voiceScore(v) {
+  const name = v.name.toLowerCase();
+  let score = 0;
+  if (!v.lang.toLowerCase().startsWith("en")) return -100;
+  if (/natural|neural|online|enhanced|premium/.test(name)) score += 50;
+  if (/aria|jenny|ava|emma|michelle|samantha|allison|zoe|serena|libby|sonia|google us english|google uk english female/.test(name)) score += 20;
+  if (/en-us/i.test(v.lang)) score += 5;
+  if (v.localService === false) score += 3;
+  // Novelty and very robotic voices
+  if (/espeak|zarvox|fred|albert|bad news|bells|boing|bubbles|cellos|whisper|wobble|trinoids|jester|organ|superstar|ralph|junior|grandma|grandpa|rocko|shelley|flo|eddy|reed|sandy/.test(name)) score -= 60;
+  return score;
+}
+
+function loadVoices() {
+  if (!canTalk) return;
+  voices = window.speechSynthesis.getVoices()
+    .filter(v => voiceScore(v) > -50)
+    .sort((a, b) => voiceScore(b) - voiceScore(a));
+  if (!voices.length) return;
+
+  let saved = null;
+  try { saved = localStorage.getItem("readerVoice"); } catch (e) {}
+  chosenVoice = voices.find(v => v.name === saved) || voices[0];
+
+  voiceSelect.innerHTML = "";
+  voices.forEach(v => {
+    const opt = document.createElement("option");
+    opt.value = v.name;
+    opt.textContent = v.name.replace(/^Microsoft\s|\s-\s.*$/g, "") + " (" + v.lang + ")";
+    if (v === chosenVoice) opt.selected = true;
+    voiceSelect.appendChild(opt);
+  });
+  voiceRow.hidden = voices.length < 2;
+}
+
+if (canTalk) {
+  loadVoices();
+  window.speechSynthesis.addEventListener("voiceschanged", loadVoices);
+  voiceSelect.addEventListener("change", () => {
+    chosenVoice = voices.find(v => v.name === voiceSelect.value) || chosenVoice;
+    try { localStorage.setItem("readerVoice", chosenVoice.name); } catch (e) {}
+    speak("Hi! This is how I sound when I read your story.");
+  });
+  voiceTest.addEventListener("click", () => speak("Hi! This is how I sound when I read your story."));
+}
 
 function stopTalking() {
-  if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+  if (canTalk) window.speechSynthesis.cancel();
 }
 
+// Speak one sentence at a time, at a normal talking speed.
+// Short pieces sound more natural and avoid a browser bug that
+// cuts off long speech.
 function speak(words) {
-  if (!("speechSynthesis" in window)) return;
+  if (!canTalk) return;
   stopTalking();
-  const talk = new SpeechSynthesisUtterance(words);
-  talk.rate = 0.9;
-  talk.pitch = 1.1;
-  window.speechSynthesis.speak(talk);
+  const parts = words
+    .replace(/[“”]/g, "")
+    .replace(/…/g, "...")
+    .match(/[^.!?]+[.!?]*(\s|$)/g) || [words];
+  parts.map(p => p.trim()).filter(Boolean).forEach(part => {
+    const talk = new SpeechSynthesisUtterance(part);
+    if (chosenVoice) {
+      talk.voice = chosenVoice;
+      talk.lang = chosenVoice.lang;
+    }
+    talk.rate = 1;
+    talk.pitch = 1;
+    window.speechSynthesis.speak(talk);
+  });
 }
 
-function addChoice(label, onClick) {
-  const btn = document.createElement("button");
-  btn.className = "choice";
+/* ---------------- Pick, then confirm ---------------- */
+function resetPick(group, goBtn, waitingWords) {
+  pickedAction = null;
+  group.classList.remove("has-pick");
+  group.querySelectorAll(".pick").forEach(b => {
+    b.classList.remove("picked");
+    b.setAttribute("aria-pressed", "false");
+  });
+  goBtn.disabled = true;
+  goBtn.classList.remove("ready");
+  goBtn.textContent = waitingWords;
+}
+
+function makePickable(btn, group, goBtn, sayWords, action) {
+  btn.classList.add("pick");
   btn.type = "button";
-  btn.textContent = label;
-  btn.addEventListener("click", () => { stopTalking(); onClick(); });
-  choices.appendChild(btn);
+  btn.setAttribute("aria-pressed", "false");
+  btn.addEventListener("click", () => {
+    group.querySelectorAll(".pick").forEach(b => {
+      b.classList.remove("picked");
+      b.setAttribute("aria-pressed", "false");
+    });
+    btn.classList.add("picked");
+    btn.setAttribute("aria-pressed", "true");
+    group.classList.add("has-pick");
+    pickedAction = action;
+    speak(sayWords);
+
+    goBtn.disabled = false;
+    goBtn.textContent = "✔ Go!";
+    goBtn.classList.remove("ready");
+    void goBtn.offsetWidth;   // restart the wiggle
+    goBtn.classList.add("ready");
+  });
 }
 
+function confirmPick() {
+  if (!pickedAction) return;
+  stopTalking();
+  const action = pickedAction;
+  pickedAction = null;
+  action();
+}
+homeGo.addEventListener("click", confirmPick);
+storyGo.addEventListener("click", confirmPick);
+
+/* ---------------- Screens ---------------- */
 function showHome() {
   stopTalking();
   reader.hidden = true;
   home.hidden = false;
+  resetPick(shelf, homeGo, "Pick a story first");
   window.scrollTo(0, 0);
 }
 
@@ -495,47 +842,56 @@ function showScene(id) {
 
   picture.textContent = scene.pic;
   picture.classList.remove("pop");
-  void picture.offsetWidth; // restart the animation
+  void picture.offsetWidth;   // restart the pop
   picture.classList.add("pop");
 
   text.textContent = scene.text;
 
   choices.innerHTML = "";
-  if (scene.end) {
-    addChoice("🔁 Read it again", () => showScene("start"));
-    addChoice("📚 Pick another story", showHome);
-  } else {
-    scene.choices.forEach(([label, next]) => addChoice(label, () => showScene(next)));
-  }
+  const options = scene.end
+    ? [["🔁 Read it again", () => showScene("start")], ["📚 Pick another story", showHome]]
+    : scene.choices.map(([label, next]) => [label, () => showScene(next)]);
+
+  options.forEach(([label, action]) => {
+    const btn = document.createElement("button");
+    btn.className = "choice";
+    btn.textContent = label;
+    makePickable(btn, choices, storyGo, label.replace(/^\S+\s/, m => /\p{Extended_Pictographic}/u.test(m) ? "" : m), action);
+    choices.appendChild(btn);
+  });
+
+  resetPick(choices, storyGo, "Pick one first");
   window.scrollTo(0, 0);
 }
 
-// Build the story picker
+/* ---------------- Build the story shelf ---------------- */
 Object.entries(stories).forEach(([id, story]) => {
   const btn = document.createElement("button");
   btn.className = "book";
-  btn.type = "button";
   btn.style.background = story.color;
-  btn.innerHTML = `<span class="icon" aria-hidden="true"></span><span class="name"></span>`;
+  btn.innerHTML = '<span class="icon" aria-hidden="true"></span><span class="name"></span>';
   btn.querySelector(".icon").textContent = story.icon;
   btn.querySelector(".name").textContent = story.title;
-  btn.addEventListener("click", () => startStory(id));
+  makePickable(btn, shelf, homeGo, story.title, () => startStory(id));
   shelf.appendChild(btn);
 });
 
 readBtn.addEventListener("click", () => {
   const scene = stories[storyId].scenes[sceneId];
   if (scene.end) {
-    speak(scene.text + " ... The end!");
+    speak(scene.text + " The end!");
+  } else if (scene.choices.length === 1) {
+    speak(scene.text + " Next: " + scene.choices[0][0] + ".");
   } else {
-    const options = scene.choices.map(c => c[0]).join(", or ");
-    speak(scene.text + " ... " + options + "?");
+    const opts = scene.choices.map(c => c[0]);
+    const last = opts.pop();
+    speak(scene.text + " What will you do? " + opts.join(". ") + ". Or, " + last + ".");
   }
 });
 
 backBtn.addEventListener("click", showHome);
 
-if (!("speechSynthesis" in window)) readBtn.hidden = true;
+if (!canTalk) readBtn.hidden = true;
 </script>
 </body>
 </html>
